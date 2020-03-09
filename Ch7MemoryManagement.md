@@ -99,5 +99,47 @@
 - translating from virtual to physical address
     - look up in page table to find physical frame number (PFN) corresponding to the VPN
     - page table resides in memory
-        - page table base register contains the base address of page table for current process
+        - page table base register (PTBR) contains the base address of page table for current process
         - this register is part of the PCB
+### Paging Hardware
+- add PTBR to datapath
+- overall flow:
+    - cpu computes address of page table entry that corresponds with the VPN using the contents of the PTBR
+    - PFN fetched from the entry is added to the page offset to get physical address
+- need 2 memory retrievals 
+    - sped up using translation lookaside buffer(TLB) to store recent address translations
+### Page Table 
+- memory manager sets up page table on process startup
+    - hardware uses table for address transaltion
+    - also a data structure under the memory manager
+### Relative Sizes of Physical and Virtual Memories
+- can have more physical memory than virtual memory
+    - used for processes that hog a lot of memory
+## Segmented Virtual Memory
+- house analogy - each room has a functional duty (kitchen room, living room, bedroom)
+- partition address space like the house analogy - multiple, each with own function and separate from one another
+    - example: heap, data, code address spaces
+    - good for debugging as well
+- each address space is called `segment`. Each segment has
+    - unique segment number
+    - segment size
+- address has 2 parts
+    - low order bits = segment offset
+    - higher order bits = segment number
+- broker looks up in segment table to convert this address into a physical address
+- example: program that has been segmented
+![](./images/ch7/8.png)
+### Hardware for Segmentation
+- segment table is a data structure similar to page table
+    - each entry is callsed segment descriptor-has start address and size of segment
+- needs segment table base register (STBR)
+## Paging vs Segmentation
+- both are techniques for implementing virtual memory
+![](./images/ch7/9.png)
+    - segmentation has the possibility of external fragmentation
+- in order for system for be efficient, data transfer from disk to memory must be efficient - paging is more efficient b/c page size is a system attribute
+- best technique - paged segmentation
+### CPU Generated Address Interpretation
+- number of bits in CPU address depends on memory addressing capability of processor
+- physical address depends on size of physical memory
+

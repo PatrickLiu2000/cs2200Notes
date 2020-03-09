@@ -11,17 +11,17 @@
         - caching memory
 - what determines execution time
     - \# of instructions
-    - \# of microstates for each instruction - clocks per instruction **CPI**
+    - \# of microstates for each instruction - clocks per instruction `CPI`
     - clock cycle time of processor
 
 - $\textbf{Execution time} = n \times CPI_{avg} \times \text{clock cycle time}$
 
 ## Instruction Frequency
 - how many times an instruction occurrs
-- **static frequency**: \# of times instruction occurs in the compiled code
+- `static frequency`: \# of times instruction occurs in the compiled code
     - if instruction has a high static freq, we can try and optimize the amount of space it occupies in memory
     - optimizing this is not very practical
-- **dynamic freq**: \# of times instruction actually runs in program
+- `dynamic freq`: \# of times instruction actually runs in program
     - if instruction has high dynamic feq, then try and optimize the datapath/control to make CPI low 
 
 ## Benchmarks
@@ -50,7 +50,7 @@
 ## Increasing Throughput of Processor
 - instead of focusing on latency improvements, focus on throughput: \# of instructions executed by CPU per unit time
     - instead of clock cycles per instruction, focus on instructions per clock cycle
-    - called **Pipelining**
+    - called `Pipelining`
 
 ## Intro to Pipelining
 - sandwich line analogy: assembly line
@@ -130,7 +130,7 @@
 ### Structural Hazard
 - limitations in hardware resources
     - ex) single BUS
-- if need more than 1 clock cycle, then let previous/next stage know through **feedback lines**
+- if need more than 1 clock cycle, then let previous/next stage know through `feedback lines`
 - example: need 2 clock cycles for beq- only 1 ALU
 - executing beq instruction
     - beq goes to EX
@@ -191,11 +191,11 @@
 - delayed branch
     - assume that instruction after branch always executes (means that just continue sequentially in program) - so, always execute a NOP instruction after branch instruction
         - to optimize this, compiler looks at instructions to find a useful instruction that won't affect program semantics
-        - called the **delay slot**
+        - called the `delay slot`
 - branch prediction
     - assume branch will always be one way (either always branch or never branch) and let instructions into pipeline once branch is detected
 - recovering from mispredictions
-    - need to be able to terminate instructions in pipeline and start fetching from alternative path - called **flushing**
+    - need to be able to terminate instructions in pipeline and start fetching from alternative path - called `flushing`
     - IF and ID/RR stages stop once they receive signal (even while executing instructions) and start bubbling
 - examples
     - correct prediction: no bubbling needed

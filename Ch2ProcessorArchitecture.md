@@ -199,13 +199,13 @@ struct {
     - ![Screen Shot 2020-01-14 at 10.37.33 AM.png](./images/ch2/0d0b6641.png)
     - ![Screen Shot 2020-01-14 at 10.37.47 AM.png](./images/ch2/24a6cad2.png)
 
-- **Activation record**
+- `Activation record`
     - The portion of the stack that is relevant to the currently executing procedure
     - ![Screen Shot 2020-01-14 at 10.41.54 AM.png](./images/ch2/3ee44e4c.png)
 
-- **recursion**
+- `recursion`
     - don't need anything else
-- **frame pointer**
+- `frame pointer`
     - stack pointer may move during execution of the function
     - designate a register for frame pointer - contains known point in activation record for the function, and will never change
     - ![Screen Shot 2020-01-16 at 9.37.14 AM.png](./images/ch2/be8d79f4.png)

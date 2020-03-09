@@ -11,30 +11,30 @@
     - compiler compiles code into binary 
     - linker links code with libraries that we have used in program, which outputs binary as well
 - loader looks at disk and creates memory footprint
-- we will focus on **scheduler**
+- we will focus on `scheduler`
     - allocate processor resources to programs
     - algorithm that chooses the best program to run first
     - ![Screen Shot 2020-02-19 at 6.29.59 PM.png](./images/ch6/6d8952ff.png)
-- **process/job** - program in execution + threads that are executing program
+- `process/job` - program in execution + threads that are executing program
 - properties to determine priority
     - static:
         - expected running time/memory usage
     - dynamic:
         - available memory, arrival time of program
-- **tasks/threads**: units of work
-- **thread of control**
+- `tasks/threads`: units of work
+- `thread of control`
     - based on logic/flow of program, multiple threads can decide to traverse paths through program
 
 ![Screen Shot 2020-02-19 at 6.37.29 PM.png](./images/ch6/42594525.png)
 
 ## Scheduling Environments
-- **multiprogrammed**-loads multiple programs into memory from disk
+- `multiprogrammed`-loads multiple programs into memory from disk
 - long-term scheduler: used in batch-based OS
     - balanced resources within system (processor, disk, memory)
 - loader: creates memory footprint whenever user runs a program
 - medium-term scheduler: used in modern OS
     - monitors use of dynamic memory usage to determine whether to increase number of processes running and competing for CPU (degree of multiprogramming)
-    - tries to control **thrashing** - where current memory requirements of processes exceed memory capacity, resulting in slowdown in execution for all programs
+    - tries to control `thrashing` - where current memory requirements of processes exceed memory capacity, resulting in slowdown in execution for all programs
 - short-term scheduler: modern OS
     - select a process from current set of processes in memory 
     - focus of chapter
@@ -71,8 +71,8 @@ typedef struct control_block_type {
     address address_space; /* where in memory */
 } control_block;
 ```
-- properties that a scheduler may know about process stored in structure called **process control block(PCB)**
-    - one PCB for each process stored in a linkedlist - called the **ready queue**
+- properties that a scheduler may know about process stored in structure called `process control block(PCB)`
+    - one PCB for each process stored in a linkedlist - called the `ready queue`
         - most important data structure in scheduler - efficiency of this is key to scheduler performance
 - OS also maintains an I/O queue similar to ready queue for processes that are waiting on I/O
 - CPU uses ready queue to schedule processes
@@ -115,7 +115,7 @@ typedef struct control_block_type {
 - provides best avg waiting time, and eliminates convoy effect
 - potential for starvation
     - example: shorter jobs keep entering, so a process might have to wait forever
-        - solution: **aging**: gives preference for jobs that have been in the queue for a while
+        - solution: `aging`: gives preference for jobs that have been in the queue for a while
 - example: 
 ![](./images/ch6/085923.png)
 ### Priority

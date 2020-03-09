@@ -66,7 +66,7 @@
         - need one clock cycle to transfer info from one storage element to another
         - ![Screen Shot 2020-01-21 at 10.05.01 AM.png](./images/ch3/225e5c99.png)
         - ![Screen Shot 2020-01-21 at 10.05.23 AM.png](./images/ch3/1ae1bb25.png)
-- **Clock width**
+- `Clock width`
     - look at all the possible delays:
         - time that has to elapse for the output of PC to be stable for reading
         - wire delay for the address to propagate from the output of PC to the Addr input of the memory
@@ -172,7 +172,7 @@
 ![Screen Shot 2020-01-28 at 10.23.13 AM.png](./images/ch3/641410b5.png)
 - control table:
     - ![Screen Shot 2020-01-28 at 10.23.40 AM.png](./images/ch3/130bb59d.png)
-    - each table entry is a **microinstruction**, entire ROM table is called **microprogram**
+    - each table entry is a `microinstruction`, entire ROM table is called `microprogram`
 
 ## DECODE Macrostate
 - once `ifetch3` is done, go to decode macrostate

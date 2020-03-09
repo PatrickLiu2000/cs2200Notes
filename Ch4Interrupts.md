@@ -42,7 +42,7 @@
 - processor detects discontinuity
 - redirecting processor to deal w/ discontinuity is OS's responsibility
 - to deal with the discontinuity
-    - processor simply needs to execute different set of instructions corresponding with the discontinuity-called a **handler**
+    - processor simply needs to execute different set of instructions corresponding with the discontinuity-called a `handler`
     - much like a procedure call, except can happen at any time in program, and may/may not return to interrupted program
 
 ![Screen Shot 2020-02-02 at 12.39.02 PM.png](./images/ch4/004a837b.png)
@@ -52,7 +52,7 @@
     - can be unrelated to current program, so must save PC somehow
     - must determine what address to go to once discontinuity is detected
     - must know how to resume normal program execution
-- to solve this, data structure called **interrupt vector table** exists
+- to solve this, data structure called `interrupt vector table` exists
     - maintained within OS in memory that is known to the processor
     - each discontinuity is given a unique # that is called a vector-used as an index
     - OS sets this up at boot time
