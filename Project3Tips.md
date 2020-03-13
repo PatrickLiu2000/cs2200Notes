@@ -23,6 +23,8 @@
 - to start debugging after you have changed your source code, run these commands:
 1. `make clean` - trashes any old object files/executables
 2. `make debug` - makes new executables/object files, and allows you to debug using GDB
+    - or simply use `make` if you want to check you differences between log files
+    - MAKE SURE TO DO THESE 2 COMMANDS EVERY TIME YOU MAKE A CHANGE TO YOUR SOURCE CODE
 3. `gdb ./vm-sim` - runs GDB with the simulator
 4. `r -i traces/<trace_file_you_want_>.trace -<page_replacement_algo_to_test> -c`
     - the `-c` flag runs it with the corruption checker
