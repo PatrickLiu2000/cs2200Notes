@@ -1,4 +1,4 @@
-# Project  1 Tips
+# Project 1: Datapath Implementation Tips
 ## Best Resources
 - textbook - a lot of the diagrams of the different units, as well as the descriptions of the different instructions themselves are implemented exactly in this project
 - piazza
@@ -18,7 +18,9 @@
 ### Debugging
 - i would create separate assembly files, simply calling 1 instruction and see if it outputs correctly in the datapath before testing the assembly file the project wants you to test
   - this allows you to isolate instructions one by one, and making sure you have implemented them all correctly
-
+- make sure your `next state` fields are correct!
 ## Final Thoughts on Project
 - this project is pretty representative of how projects in this class go; one of the main things being that you cannot even test your implementation until nearly the last step, which kind of sucks
-  - for this reason, I would highly suggest that you read up on the concepts using the textbook/recitation slides that are discussed before implementing it, as a simple mistake in the datapath can lead to a lot of headache in debugging later
+  - for this reason, I would highly suggest that you read up on the concepts using the textbook/recitation slides that are discussed before implementing it, as a simple mistake in the datapath can lead to a lot of headaches in debugging later
+  
+# REMEMBER TO SIGN UP FOR DEMOS AND DO NOT MISS THEM!!!!

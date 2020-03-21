@@ -1,4 +1,4 @@
-# Project 3: Visual Memory Tips
+# Project 3: Virtual Memory Tips
 ## Don't Just Read, Understand
 - make sure to not just read the textbook/lecture slides very carefully, but make sure that you fundamentally know the concepts that it discusses
     - in this case knowing exactly what a frame table and page table are (what their entries map to, and how to index into them), the concept of paging (basically contiguous memory chunks)
@@ -32,3 +32,5 @@
         - I would highly recommend you run it with this flag if you are having segfaults
 5. Last step: once you run into the segfault/error, you want to see the code and variables around it!
     - this is where the GDB commands come in. I would highly recommend you check out this website: http://www.yolinux.com/TUTORIALS/GDB-Commands.html or other tutorials online on the useful commands that GDB offers you.
+
+# REMEMBER TO SIGN UP FOR DEMOS AND DO NOT MISS THEM!!!!
