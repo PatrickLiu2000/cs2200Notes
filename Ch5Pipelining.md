@@ -1,5 +1,29 @@
 # Ch5: Processor Performance and Pipelines
-
+- [Ch5: Processor Performance and Pipelines](#ch5-processor-performance-and-pipelines)
+  - [Space and Time Metrics](#space-and-time-metrics)
+  - [Instruction Frequency](#instruction-frequency)
+  - [Benchmarks](#benchmarks)
+  - [Increasing Processor Performance](#increasing-processor-performance)
+  - [Speedup](#speedup)
+  - [Increasing Throughput of Processor](#increasing-throughput-of-processor)
+  - [Intro to Pipelining](#intro-to-pipelining)
+  - [Intruction Processing Assembly Line](#intruction-processing-assembly-line)
+  - [Problems with Simple Pipeline](#problems-with-simple-pipeline)
+  - [Fixing Problems](#fixing-problems)
+  - [Datapath Elements for Pipeline](#datapath-elements-for-pipeline)
+  - [Pipeline-Conscious Structure and Implementation](#pipeline-conscious-structure-and-implementation)
+  - [Tracing Instruction Through Pipeline](#tracing-instruction-through-pipeline)
+  - [Pipeline Register Design](#pipeline-register-design)
+  - [Hazards](#hazards)
+    - [Structural Hazard](#structural-hazard)
+    - [Data Hazard](#data-hazard)
+      - [Solving RAW - Data Forwarding](#solving-raw---data-forwarding)
+      - [RAW Hazard - LW](#raw-hazard---lw)
+      - [WAR and WAW](#war-and-waw)
+    - [Control Hazard](#control-hazard)
+      - [Dealing With Branches](#dealing-with-branches)
+    - [Summary of Dealing W/ Branches](#summary-of-dealing-w-branches)
+  - [Program Discontinuities Within Pipeline](#program-discontinuities-within-pipeline)
 ## Space and Time Metrics
 - Memory footprint - how much memory instruction occupies
 - execution time - how long it takes to execute

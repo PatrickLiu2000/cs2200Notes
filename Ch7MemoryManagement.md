@@ -1,4 +1,23 @@
 # Ch7: Memory Management Techniques
+- [Ch7: Memory Management Techniques](#ch7-memory-management-techniques)
+  - [Memory Manager Functionalities](#memory-manager-functionalities)
+  - [Simple Schemes For Memory Management](#simple-schemes-for-memory-management)
+    - [Separation of User and Kernel](#separation-of-user-and-kernel)
+    - [Static Relocation](#static-relocation)
+    - [Dynamic Relocation](#dynamic-relocation)
+  - [Memory Allocation Schemes](#memory-allocation-schemes)
+    - [Fixed Size Partitions](#fixed-size-partitions)
+    - [Variable Size Partitions](#variable-size-partitions)
+    - [Compaction](#compaction)
+  - [Paged Virtual Memory](#paged-virtual-memory)
+    - [Page Table](#page-table)
+    - [Paging Hardware](#paging-hardware)
+    - [Page Table](#page-table-1)
+    - [Relative Sizes of Physical and Virtual Memories](#relative-sizes-of-physical-and-virtual-memories)
+  - [Segmented Virtual Memory](#segmented-virtual-memory)
+    - [Hardware for Segmentation](#hardware-for-segmentation)
+  - [Paging vs Segmentation](#paging-vs-segmentation)
+    - [CPU Generated Address Interpretation](#cpu-generated-address-interpretation)
 ## Memory Manager Functionalities
 - garbage collection: automatically frees memory that is not being currently used by program
 - focus is on how OS manages memory

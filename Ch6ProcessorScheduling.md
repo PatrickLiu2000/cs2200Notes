@@ -1,6 +1,21 @@
 # Ch6: Processor Scheduling
 - how do we want to prioritize activites processor has to do?
-
+- [Ch6: Processor Scheduling](#ch6-processor-scheduling)
+  - [Programs and Processes](#programs-and-processes)
+  - [Scheduling Environments](#scheduling-environments)
+  - [Scheduling Basics](#scheduling-basics)
+  - [Performance Metrics](#performance-metrics)
+  - [Non-Preemptive Scheduling Algos](#non-preemptive-scheduling-algos)
+    - [FCFS - First Come, First Served](#fcfs---first-come-first-served)
+    - [SJF - Shortest Job First](#sjf---shortest-job-first)
+    - [Priority](#priority)
+  - [Preemptive Scheduling Algos](#preemptive-scheduling-algos)
+    - [Round Robin Scheduler](#round-robin-scheduler)
+      - [Details of Round Robin Algo](#details-of-round-robin-algo)
+  - [Combining Priority and Preemption, Meta Schedulers](#combining-priority-and-preemption-meta-schedulers)
+  - [Scheduling Environments](#scheduling-environments-1)
+  - [Summary of Algorithms](#summary-of-algorithms)
+  - [Linux Scheduler](#linux-scheduler)
 ## Programs and Processes
 - Operating system is simply a program
     - sole purpose is to execute user programs 

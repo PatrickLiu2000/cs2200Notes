@@ -1,11 +1,24 @@
 # Ch9: Memory Hierarchy
-- accessing memory is much slower than performing other datapath actions
-  - memory is around 100ns, CPU clock speeds are under 1 ns
-- `access time`: delay between submitting a request to the memory and getting the data
-- `cycle time`: time gap needed between two successive requests to the memory system
-- register file is much faster than physical memory
-  - uses a faster type of RAM (SRAM)
-  - register file is much smaller in terms of memory footprint
+- [Ch9: Memory Hierarchy](#ch9-memory-hierarchy)
+  - [Concept of a Cache](#concept-of-a-cache)
+  - [Principle of Locality](#principle-of-locality)
+  - [Basic Terms](#basic-terms)
+  - [Multilevel Memory Hierarchy](#multilevel-memory-hierarchy)
+  - [Cache Organization](#cache-organization)
+  - [Direct-Mapped Cache Organization](#direct-mapped-cache-organization)
+    - [Cache Lookup](#cache-lookup)
+    - [Fields of Cache entry](#fields-of-cache-entry)
+    - [Hardware for Direct Mapped Cache](#hardware-for-direct-mapped-cache)
+  - [Repercussion on Pipelined Processor Design](#repercussion-on-pipelined-processor-design)
+  - [Cache read/write algos](#cache-readwrite-algos)
+    - [Read access to the cache from CPU](#read-access-to-the-cache-from-cpu)
+    - [Write access to cache from CPU](#write-access-to-cache-from-cpu)
+      - [Write Through Policy](#write-through-policy)
+      - [Write back Policy](#write-back-policy)
+      - [Comparison of Write Policies](#comparison-of-write-policies)
+  - [Dealing with Cache Misses in Pipeline](#dealing-with-cache-misses-in-pipeline)
+    - [Effect of Memory stalls due to cache misses on pipeline performance](#effect-of-memory-stalls-due-to-cache-misses-on-pipeline-performance)
+  - [Exploiting Spatial Locality to Improve Cache Performance](#exploiting-spatial-locality-to-improve-cache-performance)
 ## Concept of a Cache
 - ideally, we want to have size of large memory but speed of small memory
   - implement small, fast memory using SRAM
@@ -15,7 +28,7 @@
   - store information brought from memory in the cache
   - much smaller than main memory, but much faster
 - CPU looks in the cache for data it wants from main memory; if it is not in there, then it retreives it from main memory
-![](./images/ch9/0.png)
+![](./images/ch9/0.PNG)
 ## Principle of Locality
 - program typically accesses a small region of memory regardless of how large the program size is
   - region may change over time, but changes are gradual
@@ -53,7 +66,7 @@
   - $EMAT_i = T_i + m_i * EMAT_{i+1}$
 - `memory hierarchy`: all storage containing either instructions/data that a processor accesses directly and indirectly
   - indirect = storage is not visible to ISA
-![](./images/ch9/0.png)
+![](./images/ch9/1.PNG)
 ## Cache Organization
 - 3 facets to organization: placement, algorithm for lookup, and validity
 - placement: where do we place the data in the cache?
@@ -85,7 +98,7 @@
   - cache tag and cache index
     - LSB are index, MSB as tag
 ### Hardware for Direct Mapped Cache
-![](./images/ch9/0.png)
+![](./images/ch9/2.PNG)
 - index part of memory picks out entry in cache, and comparator compares tag field in cache to memory address
   - if this matches and the entry is valid, then it is hit, and supplies data field of selected (`cache line/cache block/cache entry`) to CPU
 - tag and valid bit are metadata needed
@@ -117,3 +130,36 @@
     - process is slow, so use a write buffer in datapath, also happens in the MEM stage
   - write buffer completes write to main memory independent of CPU
     - if write buffer is full, write stall occurs
+- write allocate: usual way to handle write misses
+  - data being written will be needed by program in the near future, so put it in the cache
+  - since block is missing from cache, we need to allocate cache block and bring in missing memory block into it
+- no write allocate: not as popular
+  - write access can complete quickly since processor doesn't need data
+  - simply places write into write buffer, so no write stalls occur
+#### Write back Policy
+- update only the cache on CPU write
+- steps
+  - similar to write-through policy - if write hit, CPU writes to cache
+  - contents of the cache entry and the memory location are inconsistent with each other doesnt matter as long as it first checks the cache before going to memory on a read
+  - when we have to update main mem: must replace entry in cache eventually, and corresponding memory location must be updated as well with the latest data
+    - need a way to tell if cache entry data is more current than data in memory
+      - introducing dirty bit
+        - cache clears bit upon bringining in a memory location into entry
+        - set dirty bit upon CPU write
+        - cache writes back data in cache to memory location upon replacement
+- write buffer: prioritizes servicing read misses over writing to memory
+#### Comparison of Write Policies
+- write through
+  - main memory is always up to date, but slower
+  - cache is always clean (never have to write back)
+- multilevel cache
+  - use write through for L1 cache, and write back for l2 and l3
+## Dealing with Cache Misses in Pipeline
+- memory accesses disrupt pipeline, so must mitigate effect of isses
+- possible to hide misses if the value is not used until a couple of instructions later
+### Effect of Memory stalls due to cache misses on pipeline performance
+- hazards increase the CPI, ass well as misses causing memory stall cycles
+![](./images/ch9/3.png)
+- must reduce miss rate and miss penalty
+## Exploiting Spatial Locality to Improve Cache Performance
+- idea is to bring adjacent memory locations into cache upon a miss for a memory location `i`
