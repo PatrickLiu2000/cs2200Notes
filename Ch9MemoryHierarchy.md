@@ -159,7 +159,7 @@
 - possible to hide misses if the value is not used until a couple of instructions later
 ### Effect of Memory stalls due to cache misses on pipeline performance
 - hazards increase the CPI, ass well as misses causing memory stall cycles
-![](./images/ch9/3.png)
+![](./images/ch9/3.PNG)
 - must reduce miss rate and miss penalty
 ## Exploiting Spatial Locality to Improve Cache Performance
 - idea is to bring adjacent memory locations into cache upon a miss for a memory location `i`
