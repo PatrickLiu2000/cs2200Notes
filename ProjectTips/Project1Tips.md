@@ -9,7 +9,7 @@
 - since the excel sheet is so big, here are some formatting tips to help debug
 - there is an excel option to highlight cells that are a certain value. In this case, we want to highlight all cells that have a `1` in them. Here is how to do this in excel:
   - click on the conditional formatting box:
-![](./images/projects/1.png)
+![](../images/projects/1.png)
     - then, click "highlight cells rules"
       - then click "equal to"
         - and in this case, we want to highlight `1`, so type 1 into the box.
