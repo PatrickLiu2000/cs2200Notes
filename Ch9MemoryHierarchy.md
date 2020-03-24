@@ -29,6 +29,16 @@
   - [Cache Replacement Policy](#cache-replacement-policy)
   - [Recapping Types of Misses](#recapping-types-of-misses)
   - [Integrating TLB and Caches](#integrating-tlb-and-caches)
+  - [Cache Controller](#cache-controller)
+  - [Virtually Indexed Physically Tagged Cache](#virtually-indexed-physically-tagged-cache)
+  - [Recap of Cache Design](#recap-of-cache-design)
+  - [Main Memory Design Considerations](#main-memory-design-considerations)
+    - [Simple Main Memory](#simple-main-memory)
+    - [Main Memory and Bus to Match block size](#main-memory-and-bus-to-match-block-size)
+    - [Interleaved Memory](#interleaved-memory)
+  - [Modern Main Memory Systems](#modern-main-memory-systems)
+  - [Performance Implications of Memory Hierarchy](#performance-implications-of-memory-hierarchy)
+  - [Summary Graphic](#summary-graphic)
 ## Concept of a Cache
 - ideally, we want to have size of large memory but speed of small memory
   - implement small, fast memory using SRAM
@@ -242,3 +252,77 @@
 - capacity - cache is full
 - conflict - mapping strategy that causes miss
 ## Integrating TLB and Caches
+- transaction lookaside buffer
+  - cache of addresses
+  - given a VPN, returns a PFN
+  - small size for fast speed
+- designed quite similarly to processor caches
+- putting all the parts together
+  - CPU generates virtual address
+  - TLB does virtual address to physical address translation
+    - can miss in TLB
+  - cache uses physical address to check either I-cache or d-cache
+    - can miss as well
+![](./images/ch9/7.png)
+- most implementations have 2 TLBs for data and instruction translation
+## Cache Controller
+- piece of hardware that interfaces with cache internals and rest of memory system
+  - upon request from processor, looks up cache to determine hit/miss, and sends data if hit
+    - on miss, initiates bus transaction to look deeper in mem hierarchy
+  - once requested data arrives, controller places block within cache 
+  - can specify certain parts of mem as uncacheable
+## Virtually Indexed Physically Tagged Cache
+![](./images/ch9/8.png)
+https://www.youtube.com/watch?v=3sX5obQCHNA
+- since TLB lookup is required right after CPU sends address, can have significant performance penalty
+- ideally, we want to be able to lookup in cache and translate using TLB in parallel
+  - use page offset (which remains unchanged in virtual address to physical address translation) as cache index, so we can lookup in parallel
+- this looking up in cache in parallel to TLB translation is called `Virtually Indexed Physically Tagged Cache`
+  - look up cache using virtual address (page offset)
+  - then, verify data is correct using tag (which is physical address) against the TLB translated physical address
+- virtual address is unchanging - limits size of cache
+  - page coloring - ensures that virtual address bits are as unchanged as possible between VPN to PFN 
+
+## Recap of Cache Design
+- processors have TLB, L1, and L2 caches
+  - TLB and L1 - reduce hit time 
+    - TLB
+      - fully associative, only 64-256 entries
+    - L1 
+      - split into data and instruction caches
+      - small degree of associativity (2)
+      - smaller size
+  - L2 - reduce miss rate
+    - combined I and D cache
+    - larger associativity (4 or 8)
+    - larger block size
+## Main Memory Design Considerations
+- much slower than CPU 
+- will discuss only basic concepts
+- 3 different memory bus organizations
+### Simple Main Memory
+- uses block read requests to service misses
+- CPU sends block to main mem, physical mem sends back data from DRAM
+  - no bus, so sends data slowly, 1 word at a time
+### Main Memory and Bus to Match block size
+- organize bus and physical mem to match block size
+- only takes a single cycle to transfer data now, but hardware is much more complex
+![](./images/ch9/9.png)
+### Interleaved Memory
+- use multiple "banks" of memory, each responsible for finding a different word in the cache block
+  - work in parallel, and reduces hardware complexity
+![](./images/ch9/10.png)
+
+## Modern Main Memory Systems
+- DRAM arranged in a rectangular array, and address is split into row and column indices
+  - indexed like a 2d array - specify row, then column, and then sends data to CPU
+- cycle time of DRAM
+  - must read each cell's charge to determine 0 or 1; must recharge after reading
+- read more in textbook/research on your own this stuff is confusing lmao
+
+## Performance Implications of Memory Hierarchy
+![](./images/ch9/11.png)
+
+## Summary Graphic
+![](./images/ch9/12.png)
+![](./images/ch9/13.png)
