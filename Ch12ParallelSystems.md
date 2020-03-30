@@ -86,3 +86,61 @@
     - basically all threads that participate in the rendezvous resume execution once they all reach the rendezvous point
     - when parent thread terminates, watch out for children processes also terminating
         - might want to wait until all children processes are done before terminating
+## Internal Representation of Data Types Provided By Thread Library
+- `thread type` and `mutex_lock_type` types are opaque types (user has no direct access to internal representation)
+- `mutex_lock_type`
+    - internal representation contains current user of the lock
+    - queue of requestors for the lock
+## Simple Programming Examples
+- basic code w/ no synchronization
+    - sample program 1:
+    ![](./images/ch12/3.png)
+    - `frame_buf` and `bufavail` are modified by both threads
+        - `fram_buf` is a circular queue with head & tail
+    - 2 threads are independent except in shaded areas, where they use the shared variables
+- need for atomicity for a group of instructions 
+    - problem is that both threads can be writing/reading from same var at the same time
+    - correct execution is that first thread executes, then 2nd thread, or vice versa - **atomic**
+    - need to make sure access to shared data structures is mutex
+- code refinement with coarse grain critical sections
+    - sample program 2:
+    - uses mutex lock, so ensures atomicity, but has performance issues, as entire other thread cannot loop if lock is in use
+    ![](./images/ch12/4.png)
+- Code refinement with fine grain critical sections
+    - no need to lock entire loop - only access to shared data structure
+    - sample program 3:
+    ![](./images/ch12/5.png)
+## Deadlocks/Livelocks
+- upon analysis of program 3, can see that deadlock can occur when buffer is full - digitizer continuously checks while statement, but tracker cannot remove image from buffer since digitizer has lock
+- **livelock** - special case of deadlock where thread is actively checking for an event that will never occur
+- solution: remove locks around while statements
+![](./images/ch12/6.png)
+## Condition Variables
+- ideally, we want system to recognize that thread is waiting on a condition to be satisfied, so until the condition is satisfied, it should release control of lock - this is where condition vars come in
+- declaration: `cond_var_type buf_not_empty;`
+- wait and signal:
+    - `thread_cond_wait(buf_not_empty, buflock);`
+        - waiting descedules the thread that makes the call
+        - implicitly performs an unlock
+    - `thread_cond_signal(buf_not_empty);`
+        - signals any thread that may be waiting on condition var
+        - indicates that any thread waiting can resume execution
+        - performs an implicit lock, and schedules waiting thread
+    - multiple threads can wait on a signal, typically handled in FCFS manner
+    - must ensure that signal doesn't come prematurely
+### Internal Representation of Condition Variable Data Type
+- `cond_var_type`
+    - contains queue of threads waiting for signal
+    - for each thread, its associated mutex lock
+## Complete solution to example
+![](./images/ch12/7.png)
+- maintains an invariant that calling thread always holds the lock for the conditional wait
+### Discussion of Solution
+- concurrency
+    - when checking the buffer, in either outcome, the lock is always released
+    - when updating the variable, only lock when need to update it
+    - no lack of concurrency
+- no deadlocks
+## Rechecking the Predicate
+- example only works for 1 digitizer and tracker
+- more general approach
