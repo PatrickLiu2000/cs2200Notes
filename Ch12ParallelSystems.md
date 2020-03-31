@@ -144,3 +144,71 @@
 ## Rechecking the Predicate
 - example only works for 1 digitizer and tracker
 - more general approach
+![](./images/ch12/8.png)
+- when T1 is about to release the resource and setes the state to `NOT_BUSY`
+    - T2 is conditionally waiting and T3 is waiting to acquire the lock
+- after T1 releases the mutex
+    - lock is given to T3, which the first thread in the mutex waiting queue
+        - since state is not busy, uses the resource
+    - T2 resumes from the conditional wait since the mutex is now available, releases the mutex, then uses the resource as well
+        - this violates the mutex principle, as T2 and T3 are both attempting to consume the resource at once
+        - T1 enables condition that allows T2 to execute, but T3 negates it
+            -  need to recheck the condition when we resume to avoid error
+- change the if to a while
+# Summary of Thread Function Calls and Threaded Programming Concepts
+- `thread_create (top-level procedure, args);`
+    - creates a new thread that starts execution in top-level procedure with the supplied args as parameters for the formal parameters specified in the procedure prototype
+- `thread_terminate (tid);`
+    - terminates thread with given `tid`
+- `thread_mutex_lock (mylock);`
+    - when thread returns it has `mylock`, if lock is being used, then calling thread is blocked
+- `thread_mutex_trylock (mylock);`
+    - thread that calls is never blocked; simply returns success/failure if lock is in use by another thread
+- `thread_mutex_unlock(mylock);`
+    - releases `mylock` in use by the thread, errors otherwise
+- `thread_join (peer_thread_tid);`
+    - calling thread blocks until `peer_thread_id` terminates
+- `thread_cond_wait(buf_not_empty, buflock);`
+    - calling thread blocks on the condition variable `buf_not_empty`, and implicitly releases `buflock`; lock must be currently held by calling thread
+- `thread_cond_signal(buf_not_empty);`
+    - any thread that is waiting on `buf_not_empty` variable is woken up and is ready for execution, and either executes or is added to the queue for the lock
+![](./images/ch12/9.png)
+# Points To Remember When Programming With Threads
+- design data structures in a way to enhance concurrency
+- minimize granularity of data structures that need to be locked as well as the duration they need to be locked
+- avoid busy waiting 
+- understand invariant is true and is preserved in critical sections
+- make sure critical sections are simply and concise as possible to debug if there are dead/livelocks
+# Threads as A Software Structuring Abstraction
+- models
+    - dispatcher model - dispatcher thread dispatches requests as they come to a pool of worker threads
+        - request queue smooths out traffic
+    - team model - all threads directly access ready queue
+    - pipelined model - each stage handles specific task
+
+# POSIX pThreads Library Calls Summary
+- all unix system follow pthread library standard
+![](./images/ch12/10.png)
+![](./images/ch12/11.png)
+![](./images/ch12/12.png)
+# OS Support for Threads
+- memory for OS is divided to kernel and user space
+- virtual memory/paging allows every process to have its own address space
+- for single threaded program, PCB contains defines a single process of the single thread on CPU
+    - if process makes system call, entire program is blocked until it finishes
+- for multithreaded process, PCB has all threads of a given process, and all share the same address space
+- TCB (thread control block) - contains all info on state of thread
+    - stack pointer, PC val, general purpose reg contents
+- since all threads share the same heap, global data, and code, only have distinct stacks for each thread
+    - **cactus stack**
+![](./images/ch12/12.png)
+## User Level Threads
+- OS maintains ready queue of scheduleable processes, and threads library maintains list of threads that are ready to run in each process with info about them in respective TCBs
+- threads at a user level cannot execute concurrently
+    - operate as co-routines instead; when one thread is blocked, thread scheduler picks some other thread to run instead
+    - can switch threads quickly at user level
+- when one of the threads in a process makes a blocking call, OS must block entire process since it does not know info about the other threads that are ready to run or not
+    - solutions:
+        - wrap all OS calls with an envelope so all calls go through thread library, and when a blocking call is made, it is caught and held until all threads cannot run
+        - upcall where OS can warn thread scheduler that blocking call is incoming, and thus scheduler can defer it to later time or switch threads
+## Kernel Level Threads
