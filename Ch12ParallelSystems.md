@@ -201,7 +201,7 @@
     - stack pointer, PC val, general purpose reg contents
 - since all threads share the same heap, global data, and code, only have distinct stacks for each thread
     - **cactus stack**
-![](./images/ch12/12.png)
+![](./images/ch12/13.png)
 ## User Level Threads
 - OS maintains ready queue of scheduleable processes, and threads library maintains list of threads that are ready to run in each process with info about them in respective TCBs
 - threads at a user level cannot execute concurrently
@@ -212,3 +212,128 @@
         - wrap all OS calls with an envelope so all calls go through thread library, and when a blocking call is made, it is caught and held until all threads cannot run
         - upcall where OS can warn thread scheduler that blocking call is incoming, and thus scheduler can defer it to later time or switch threads
 ## Kernel Level Threads
+- all threads live in single address space, therefore OS should ensure all threads share same page table
+- each thread needs own stack, but share other parts of memory footprint
+- should support thread level synchronization
+- OS may implement 2 level scheduler
+    - process level scheduler manages PCBs
+        - allocates time quanta for each process, and performs preemptive scheduling
+    - thread level scheduler manages TCBs
+        - within time quanta, thread scheduler schedules threads in in round-robin/co-routine fashion
+![](./images/ch12/14.png)
+- allows overlap of I/O and processing
+- however, unit of scheduling is still a process rather than a thread
+## Solaris Threads: Example of Kernel Level Threads
+![](./images/ch12/15.png)
+- explanation of diagram:
+    - for example, t1 and t2 of p1 are co-routines (both share that thread), while t3 runs concurrently to t1/t2.
+- 3 kinds of threads
+    - Kernel - unit of scheduling
+        - implemented in OS
+    - LWP - lighweight process
+        - representation of a process within kernel
+        - 1 to 1 association from kernel thread to lwp
+            - however, kernel thread doesn't have to have a lwp; OS uses these threads to carry out functions independent of user-level processes
+    - user - user level threads
+        - implemented at user level with some form of library
+- threads created by OS result in creation of user-level threads
+    - specifies if thread created should be attached to existing lwp or new lwp
+- ready queue of scheduler is set of kernel threads ready to run
+    - if kernel is bound to lwp, then it is executing user thread/process
+    - if kernel thread blocks, then lwp and user thread blocks as well
+- How expensive a thread switch is depends on what kernel threads are mapped to what lwp
+    - cheapest is when both user level threads map to same lwp
+    - next cheapest is switching from different lwps with same process
+    - most expensive is switching lwps from 2 different processes
+## Threads and Libraries
+- libraries typically have thread-safe wrappers to ensure atomicity for concurrent calls
+    - example: since all threads share heap, dynamic memory alloc library needs wrappers
+    - implicitly acquires lock 
+# Hardware Support for Multithreading in a Uniprocessor
+- 3 things to consider
+    - thread creation/termination
+    - communication among threads
+    - synchronization
+## Thread Creation, Termination, Communication
+- on a thread context switch within same process, no change to TLB 
+- thus, creation/termination do not need special hardware support
+## Synchronization
+- mutex lock implementation:
+    - if lock is in use (ie mutex variable == 1), then block thread
+    - else, set the mutex variable to 1
+- mutex unlock:
+    - set mutex variable to 0
+- both need to be atomic instructions
+    - unlock is simply store operation
+    - how do we implement atomic lock operation?
+## Atomic Test-and-Set Instruction
+- test-and-set memory location - new instruction
+    - read current value of memory location into proc register
+    - set memory location to a 1
+- point of atomicity is that no other thread can execute instruction while these are executing
+- **binary semaphore**
+    - signals a thread that it is safe to proceed into critical section
+- **counting semaphore**
+    - signals that `n` resources to competing threads are available
+    - at most `n` threads can consume resource
+## Lock Algorithm With Test-and-Set Instruction
+```c
+#define SUCCESS 0
+#define FAILURE 1
+int lock(int L) {
+    int X;
+    while ( (X = test-and-set (L)) == FAILURE ) {
+        /* current value of L is 1
+        * implying that the lock is
+        * currently in use
+        */
+        block the thread;
+        /* the threads library puts the
+        * the thread in a queue; when
+        * lock is released it allows
+        * this thread to check the
+        * availability of the lock again
+        */
+    }
+    /* falling out of the while loop implies that
+    * the lock attempt was successful
+    */
+    return(SUCCESS);
+}
+int unlock(int L) {
+    L = 0;
+    return(SUCCESS);
+}
+```
+# Multiprocessors
+- symmetric processor (SMP) - multiple processors that share all the system resources
+![](./images/ch12/16.png)
+- threads of program may be running on different processors
+    - software/hardware must work to share data structures used by the threads
+- must ensure
+    - threads share the same page table
+    - threads of same process have identical views of memory hierarchy even thought they are on different CPUs
+    - threads are guaranteed atomicity for synchronous operations when executing concurrently
+## Page Tables
+- ensure that page table in memory is same for all threads of same process
+- problems beyond scope of the course
+## Memory Hierarchy
+- each CPU has own cache and TLB
+- hardware is responsible for maintaining consistent view of shared memory in each cache
+    - multiprocessor cache coherence
+- example: t1, t2, t3 threads running on processors p1, p2, p3
+    - suppose all 3 have location X in cache
+    - t1 writes to cache
+        - options
+            - either invalidate copies of X in other caches using invalidation line hardware
+                - **write-invalidate protocol**
+            - update copies of X in the other caches - simply a memory write
+                - **write-update protocol**
+- **snoopy caches** - bus-based cache coherence protocols
+    - must have shared bus
+![](./images/ch12/17.png)
+## Ensuring Atomicity
+- lock and unlock algorithms discussed earlier work with multiprocessors as well
+# Advanced Topics
+## OS Topics
+### Deadlocks
