@@ -1,7 +1,41 @@
 **Ch12: Multithreaded Programming and Processors**
 
 - do multiple things at once
-
+- [Why Multithreading?](#why-multithreading)
+- [Programming Support for Threads](#programming-support-for-threads)
+    - [Thread Creation/Termination](#thread-creationtermination)
+    - [Communication Among Threads](#communication-among-threads)
+    - [Data Race and Non-Termination](#data-race-and-non-termination)
+    - [Synchronization Among Threads](#synchronization-among-threads)
+    - [Internal Representation of Data Types Provided By Thread Library](#internal-representation-of-data-types-provided-by-thread-library)
+    - [Simple Programming Examples](#simple-programming-examples)
+    - [Deadlocks/Livelocks](#deadlockslivelocks)
+    - [Condition Variables](#condition-variables)
+        - [Internal Representation of Condition Variable Data Type](#internal-representation-of-condition-variable-data-type)
+    - [Complete solution to example](#complete-solution-to-example)
+        - [Discussion of Solution](#discussion-of-solution)
+    - [Rechecking the Predicate](#rechecking-the-predicate)
+- [Summary of Thread Function Calls and Threaded Programming Concepts](#summary-of-thread-function-calls-and-threaded-programming-concepts)
+- [Points To Remember When Programming With Threads](#points-to-remember-when-programming-with-threads)
+- [Threads as A Software Structuring Abstraction](#threads-as-a-software-structuring-abstraction)
+- [POSIX pThreads Library Calls Summary](#posix-pthreads-library-calls-summary)
+- [OS Support for Threads](#os-support-for-threads)
+    - [User Level Threads](#user-level-threads)
+    - [Kernel Level Threads](#kernel-level-threads)
+    - [Solaris Threads: Example of Kernel Level Threads](#solaris-threads-example-of-kernel-level-threads)
+    - [Threads and Libraries](#threads-and-libraries)
+- [Hardware Support for Multithreading in a Uniprocessor](#hardware-support-for-multithreading-in-a-uniprocessor)
+    - [Thread Creation, Termination, Communication](#thread-creation-termination-communication)
+    - [Synchronization](#synchronization)
+    - [Atomic Test-and-Set Instruction](#atomic-test-and-set-instruction)
+    - [Lock Algorithm With Test-and-Set Instruction](#lock-algorithm-with-test-and-set-instruction)
+- [Multiprocessors](#multiprocessors)
+    - [Page Tables](#page-tables)
+    - [Memory Hierarchy](#memory-hierarchy)
+    - [Ensuring Atomicity](#ensuring-atomicity)
+- [Advanced Topics](#advanced-topics)
+    - [OS Topics](#os-topics)
+        - [Deadlocks](#deadlocks)
 # Why Multithreading?
 - `thread` - represents active unit of processing
 - allows program to express concurrent activities easily
