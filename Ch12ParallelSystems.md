@@ -1,6 +1,8 @@
 **Ch12: Multithreaded Programming and Processors**
 
 - do multiple things at once
+
+
 - [Why Multithreading?](#why-multithreading)
 - [Programming Support for Threads](#programming-support-for-threads)
     - [Thread Creation/Termination](#thread-creationtermination)
@@ -36,6 +38,15 @@
 - [Advanced Topics](#advanced-topics)
     - [OS Topics](#os-topics)
         - [Deadlocks](#deadlocks)
+        - [Advanced Synchronization Algorithms](#advanced-synchronization-algorithms)
+        - [Scheduling in Multiprocessor](#scheduling-in-multiprocessor)
+        - [Classic Problems of Concurrency](#classic-problems-of-concurrency)
+    - [Architecture Topics](#architecture-topics)
+        - [Hardware Multithreading](#hardware-multithreading)
+        - [Interconnection Networks](#interconnection-networks)
+        - [Taxonomy of Parallel Architectures](#taxonomy-of-parallel-architectures)
+        - [Message-passing Vs. Shared Address Space Multiprocessors](#message-passing-vs-shared-address-space-multiprocessors)
+        - [Memory Consistency Model and Cache Coherence](#memory-consistency-model-and-cache-coherence)
 # Why Multithreading?
 - `thread` - represents active unit of processing
 - allows program to express concurrent activities easily
@@ -371,3 +382,119 @@ int unlock(int L) {
 # Advanced Topics
 ## OS Topics
 ### Deadlocks
+- deadlocks occur b/c there are finite resources on computer
+    - example: if nonpreemptive scheduler has process that infinite loops, there is deadlock
+        - `**resource deadlock**
+            - all processes are waiting on a resource
+            - mutual exclusion and lack of preemption lead to this
+- squash (who tf plays squash)/tennis analogy
+    - 1 court, 1 pair of rackets
+    - 1 group claims the court first, while other group grabs rackets first
+    - **circular wait**/**hold and wait**
+- 4 conditions that must all hold for process to be deadlocked
+    - mutual exclusion
+    - no preemption
+    - hold and wait: process is allowed to hold resource while waiting for other resources
+    - circular wait: cyclic dependency among process waiting for resources (a is waiting for b, and b is waiting for a)
+- 3 stragies to prevent deadlocks
+    - avoidance - most conservative
+        - will not allocate resources that might result in deadlock
+        - not a good choice
+    - prevention
+        - simply break any of the conditions that can cause a deadlock
+            - breaking no preemption: preempt :)
+            - how to break mutex condition: pretend that there are many instances of the shared resource, and create a buffer of requests
+            - breaking hold and wait: specify all resources need to be obtain simultaneously before process starts
+            - break circular wait: order resources and make sure requests are made in order 
+                - tennis analogy: makes sure that you grab rackets before claiming court
+    - detection
+### Advanced Synchronization Algorithms
+- programming mutex locks is error-prone
+- concurrent programming needs
+    - need thread to be able to execute critical sections of program in a mutex manner
+    - thread to wait until some condition is satisfied
+    - thread notifies peer thread waiting for condition to become true
+- **monitor ADT** - like Java object
+    - only can have 1 active thread inside monitor at 1 time
+    - monitor has condition variables to wait and signal
+    - simplifies methods so they don't need to provide overhead for concurrency
+### Scheduling in Multiprocessor
+- simply have a shared run queue on each scheduler of each processor
+    - downsides: if thread is switched to different processor, new processor's cache most likely will not have memory location that the original processor has in their cache
+
+- **cache affinity**: scheduling queue for each processor
+- **lock-based time quantum extemsion** lengthen timeslice for thread holding a lock
+- **space sharing**: dedicate a set of processors for a certain application over its lifetime
+    - since application is dedicated to these set of processors, no context switching problems
+    - scheduler allocates different sized partitions
+    - if thread is blocked, cycles are wasted
+- **gang scheduling**
+    - related threads in application are scheduled as a group
+    - overall process
+        - time in divided into timeslices
+        - all CPUs are scheduled at beginning of timeslice
+        - scheduler allocates processors to threads using gang manner for given application
+        - different gangs can use same set of processors
+        - multiple gangs can be scheduled at the same time
+        - once scheduled the association between the thread and processor it runs on remains until the timeslice is up
+### Classic Problems of Concurrency
+- producer-consumer problem
+    - many applications can be modeled with producers putting things in a shared buffer, and consumers removing from the buffer
+- readers-writers problem
+    - example: buying tickets to movies
+    - when you access website, can see choices for seats; however, by the time you actually go to check out, the seat could have been taken because many users concurrently could be writing to the database that you just read from
+    - writers need exclusive access to database, where readers do not
+    - solution: if writer needs access, wait until all current readers have exited, and if writer exists, prevent incoming readers from accessing until writer is done
+- dining philosopher's problem
+    - philosophers alternate between thinking and eating - however, only 5 forks and 5 philosophers, and need 2 forks to eat
+    - solution: hungry state - philosopher tries to pick up both forks
+        - if not successful, keep trying until they are available - when both neighbors are not eating, and do not change state while he is trying to pick up forks
+## Architecture Topics
+### Hardware Multithreading
+- problems with instruction level parallelism - cache misses cause pipeline stalls
+- use thread level parallelism
+- analogy - filling out forms at a bank
+    - if person needs to fill out form to complete transaction, that person will move to the side and fill out the form while the bank teller takes the next customer
+    - processor is teller - threads are the customers
+        - upon a thread stall, processor picks instruction from other thread to run
+- how it is implemented
+    - processor architecture specifies how many concurrent threads it can handle in software (logical processors)
+        - represents level of duplication of hardware resources needed
+    - each logical processor has own PC, reg file
+    - OS binds thread to logical processor
+    - physical processor has mappings for each logical processor through duplicate PC, reg files, etc
+    - when an instruction corresponding with a logical processor runs through the pipeline, processor knows what specific hardware that has to be accessed
+- improves throughput, even for single-threaded applications
+- combine ILP with TLP
+### Interconnection Networks
+- how elements within computer are connected
+    - shared bus
+- large scale parallel machines have many processing elements
+    - use a mesh (connected to North, South, East, West neighbors) or tree/ring
+
+![](./images/ch12/18.png)
+### Taxonomy of Parallel Architectures
+- single instruction single data - classic uniprocessor
+- single instruction multiple data - used for fine-grained computationally intensive tasks
+- multiple instruction single data 
+- multiple instruction multiple data - most common today
+
+### Message-passing Vs. Shared Address Space Multiprocessors
+- MIMD has 2 major categories: message-passing and shared address space
+- message passing
+    - each processor has private memory, and communicate over shared interconnection network
+    - no shared memory
+    - also called distributed memory multiprocessors
+- shared address space
+    - given memory address refers to same location regardless of processor is accessing it
+    - cache coherence problem
+        - implement in either hardware or software
+    - cache coherent implementation without shared bus (since interconnection network cannot use bus)
+        - use directory-based scheme with a directory with entries associated with each piece of shared memory
+### Memory Consistency Model and Cache Coherence
+- cache coherence: once entry in cache is updated in 1 processor, must propogate change accordingly in other processors who have the same copy
+- memory consistency model - contract between programmer and memory system to define the programmer's view
+    - declares "when" the cache coherence is met 
+- sequential consistency - reads/writes are atomic with respect to system
+    - thus, when we say that processor1 has written to memory at time = x, then the value should be visible to all processors afterward
+    - each read/write is atomic
