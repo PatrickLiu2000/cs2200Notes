@@ -163,3 +163,4 @@
 - physical address depends on size of physical memory
 - entries in page table, page frames in system
 ![](./images/ch7/10.png)
+- number of page frames = 2^(number of bits in PFN)

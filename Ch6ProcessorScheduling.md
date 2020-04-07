@@ -220,3 +220,4 @@ Process termination trap handler:
     - if task runs out of time quantum or makes an i/o call, put it into expired array
     - if tasks completes i/o, place into active array w/ priority level
     - if there are no elements in active array, set expired as active array (flip pointers)
+    - **does this in O(1) time **
