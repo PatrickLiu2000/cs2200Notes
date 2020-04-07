@@ -161,4 +161,5 @@
 ### CPU Generated Address Interpretation
 - number of bits in CPU address depends on memory addressing capability of processor
 - physical address depends on size of physical memory
-
+- entries in page table, page frames in system
+![](./images/ch7/10.png)
