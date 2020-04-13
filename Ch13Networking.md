@@ -140,3 +140,126 @@
   - simply have an alternating bit from 0 to 1 (alternating bit protocol)
 - timeout value must bee greater than round trip time
 ## Pipelined Protocols
+- stop-and-wait is very slow
+  - lots of **dead time** (no activity on network)
+- if network is reliable, we can pipeline packets without waiting for ACKs
+- bandwith - amount of time it takes host to place packet on wire
+- propogation time - end-to-end delay for packet to reach destination
+- need for ACKs depends on if protocol requires reliable transport
+## Reliable Pipelined Protocol
+- another approach is to pipeline sending of packets with receiving ACKs
+  - source sends set of packets (window) before expecting ACK
+  - destination acknowledges each packet individually
+  - sender doesn't have to wait for ACKs before sending again
+![](./images/ch13/4.png)
+- size of window changes based on network congestion
+
+### Network Congestion
+- analogy: highway in rush hour
+  - several feeder streets that are putting traffic on highway, and highways can also merge
+    - streets are putting more cars on the highway than can be sustained
+- ex) four 1 gbps network flows going into one 10 gbps network flow
+  - but if there are 20 flows, there will be congestion
+- congestion causes buildup of packet queues at routers
+  - queueing delays and once queues become full, packet loss occurs
+- ways of dealing with congestion
+  - self-regulate amount of data it hands to network layer depending on congestion
+    - problem: no guaranteed upper bound for delay
+### Sliding Window
+- mechanism for self-regulation in a transport protocol that incorporates congestion control
+  - window size restricts sender's rate; prevents buildup at router queues
+- for a given window size, we can define an active window of sequence numbers corresponding to set of packets that source can send without waiting for ACKs
+- how width of packet is decided
+  - ratio of packet size to bandwith, and how many packets we can fit within 1 round trip time
+- window size can be chosen to be smaller than upper bound due to congestion
+  - represents max number of packets that can be outstanding
+- as ACKs for packets are received, window moves to the right by 1 packet
+![](./images/ch13/5.png)
+- to reduce number of ACK packets, will send a cumulative ACK
+  - when receiving n packets with consecutive sequence numbers, will send single ACK - sender knows upon receiving single ACK that all n packets have been acknowledged
+- for ACK packet loss, have timeout window when packets are initially sent, and will resend them if no ACK received within timeout window
+- additional things to consider
+  - choosing timeout values
+  - choosing window size
+  - out-of-order packets
+  - when to ACK packets
+  - when to move window
+## Dealing With Transmission Errors
+- to identify "good" from "bad" packet, source computes a **checksum**, value based on contents of packet and appends it to end of packet
+  - destination does same computation to make sure the packets match
+  - can potentially repair errors, but most likely will have to retransmit packet
+## Transport Protocols on Internet
+- **TCP (transmission control protocol)** - connection oreinted protocol
+  - sets up connection between 2 endpoints
+  - once connection is set up, data flow is a stream of bytes
+  - does not deal with messages 
+  - once connection is made, client sends requests, then server responds by sending series of objects that form webpage
+  - tear down connection once done
+  - **full duplex** - both sides can simultaneously send/receive data once connection is set up
+  - *connection setup*: both sides negotiate initial sequence number for transmission
+    - client sends server connection request message with info on initial sequence number for packets
+    - server sends ACK to connection request with info on initial sequence number for packets
+    - client allocates resources and sends ACK; once server receives ACK, server allocs resources for connection
+    - client and server have officially established connection and can exchange data
+  - *reliable data transport*: both endpts can send and receive data, and will have a guarantee that data will be sent without loss/corruption
+  - *congestion control*: sender self-regulates network flow by adjusting window size
+  - *connection teardown*
+    - client sends teardown request, server sends ACK
+    - server sends own teardown request, client sends ACK
+    - client de-allocos resources for connection, and server does the same
+    - client or server can initiate teardown
+- **UDP**
+  - does not have as much overhead/guarantees as TCP, results in it being faster
+  - applications like VOIP prefer speed over packet loss, therefore UDP is a good fit
+  - packets can be out of order/lost, and no self-control so can have problems with congestion
+![](./images/ch13/6.png)
+![](./images/ch13/7.png)
+# Network Layer
+- send packet handed to it at source from transport later to destination, and pass up incoming packet to transport layer at destination
+- combining this functionality with transport layer not a good idea
+  - many different types of network connections (wired/wireless)
+  - data might need to go through several intermediate nodes to get to destination
+    - in addition, these nodes simply need to forward packet to destination
+  - allows insertion/deletion of network connections to be independent of transport
+- network layer responsible for forwarding packet given destination address
+  - maintains a routing table that contains a route from source to destination host
+  - upon receiving a packet, either use the table to forward packet to destination, or pass up packet to transport layer if packet is at the destination
+- key functionality needed
+  - routing algorithms
+  - service model: forward incoming packet on incoming link to outgoing link based on routing information
+    - also called **switching**
+- hardware that performs functionalities of network layer is called **router**
+  - like an end host, except knows packet's destination
+## Routing Algorithms
+- **link state** - cost associated with neightboring links at a given host node
+  - like edge lengths within a graph
+- **Link state-dijkstra's**
+  - least cost path, but requires complete information on edge costs
+  - also needs to be synchronous
+  - just look at 1332 notes :)
+- **Distance vector algorithm**
+  - async, and works with partial knowledge
+  - node has to send packet to one if its neighbors - simply choose least cost one with regards to destination
+  - each node maintains distance vector table
+    - table has lowest cost route of sending packet to every destination in network through each of its neighbors
+    - name comes from each node having vector of costs for reaching destination through its neighbors
+  - psuedocode:
+    - each node sends its least cost route to given destination to its neighbors, and each node updates its DV table
+      - recomputes DV table entries if:
+        - node observes change in link-state for any of its neighbors
+        - node receives an update on least cost route from neighbor
+- **Hierarchical Routing**
+  - due to scale of internet, hierarchy approach is appropriate
+  - organize routers on internet into regions called autonomous systems 
+    - routers within the autonomous system may run link state or DV algorithms for routing hosts within the system
+    - routers that communicate with destinations outside system are called **gateway routers**
+      - use border gateway protocol (BGP)
+![](./images/ch13/8.png)
+![](./images/ch13/9.png)
+  - host connected to C.1 communicating with host connected to C.2
+    - simply use intra-AS protocol
+  - if A.4 needs to send packet to host at B.3
+    - needs to send packets to A.G, and routing table will tell packet to be sent to B.G
+    - A.G uses BGP to communicate with B.G
+    - then use intra-AS protocol to send to node B.3
+## Internet Addressing
