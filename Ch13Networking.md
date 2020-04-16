@@ -263,3 +263,163 @@
     - A.G uses BGP to communicate with B.G
     - then use intra-AS protocol to send to node B.3
 ## Internet Addressing
+- host vs router
+  - host is an endpoint at the edge of a network, and single connection
+    - 1 NIC
+  - router is an intermediate stop with multiple hosts connecting to it
+    - has multiple NICs
+- phone number analogy
+  - 3 digits: area code, 3 digits: exchange number, 4 digits: device #
+  - multiple parts, like IP addresses
+- IPv4 address - 32 bits
+  - each unique interface has unique IP
+  - PQRS - dotted decimal notation
+  - ex) 128.61.23.216 - each part is decimal notation of number in binary
+  - top 24 bits specify IP network, and bottom 8 bits identify specific device connected to network
+    - dependso n how many devices will be connected to network; # of bits can change
+  - IP network notation
+    - `x.y.z.0/n` where n = # of bits reserved for network part of IP address
+## Network Service Model
+- packets go through many nodes before reaching destination
+### Circuit Switching
+![](./images/ch13/10.png)
+- analogy: making reservations for each form of transportation from USA to India
+- network service model facilitates packet delivery 
+  - there is not a single wire between 2 endpoints like telephone; there are lots of switches between endpts
+    - dedicated circuit is established between 2 endpts while phone call is occurring (**circuit switching**)
+- different number of switches between the 2 endpts of the call, and are physically connected
+  - once call is established, network resources are reserved and quality of service is guaranteed
+- physical link may have multiple circuits for multiple connections
+  - can run out of circuits if too many calls are placed concurrently
+### Packet Switching
+![](./images/ch13/11.png)
+- alternative to circuit sqitching
+- do not reserve bandwith on any physical links
+  - analogy: simply show up at each station without reservation
+- when packet arrives at switch, switch examines packet and sends it along appropriate link towards destination
+- also called **store and forward networks** - switch cannot send packet until entire packet has arrived
+- switch may have several physical links - each link has an input buffer
+  - once entire packet arrives, examine routing table and send to output buffer to destination
+    - queueing delay can happen depending on network congestion
+  - if buffers are full, packet loss occurs
+- when sending packets, flow is highly similar to pipelined execution in datapath
+![](./images/ch13/12.png)
+### Message Switching
+![](./images/ch13/13.png)
+- switch stores and forwards the entire message rather than individual packets
+- less overhead since don't need to check every packet
+  - but, if bit errors occur, will happen to entire message instead of 1 packet
+### Service Model with Packet Switched Networks
+- packet switching is best because
+  - can fully utilize bandwidth (no need to reserve bandwidth)
+  - simpler to design and operate
+  - most efficient
+- internet uses packet switching in its network layer
+- 2 network service models
+  - datagram
+    - every packet is stamped with destination address
+  - virtual circuit
+    - no physical resources reserved
+    - establish route from source to destination during setup phase
+      - source gets virtual circuit number
+      - routers in between maintain a table that contains info about each virtual circuit currently managed by switch (incoming link, outgoing link)
+      - simply look up virtual circuit number in table and send that way
+    - teardown after done - deletes entry in table for switches in between
+- actual implementation a bit more complex
+## Network Routing vs. Forwarding
+- driving to work analogy
+  - routing would be deciding what streets to drive on
+  - forwarding would be actually driving on the chosen route
+- network layer has forwarding table that contains next node address given destination address
+- how network routes are computed
+  - computed in the background of the OS using a route daemon
+    - creates routing tables, and updates forwarding tables accordingly
+## Network Layer Summary
+![](./images/ch13/14.png)
+![](./images/ch13/15.png)
+# Link Layer and Local Area Networks
+- link layer responsible for acquiring the physical medium to transmit, and sending packet over physical medium to host
+- link layer deals with frames instead of packets
+  - packet may require several frames to be transmit
+- protocols have 2 categories
+  - random access
+    - ethernet
+  - taking turns
+    - token ring  
+- media access and control (MAC)
+  - how protocol gains access to physical medium
+## Ethernet
+- cable that connect computers together
+- like a bus
+  - arbitration logic decides who has control of bus
+## CSMA/CD
+- carrier sense multiple access/collision detect(CSMA/CD)
+  - type of random access protocol
+- analogy - polite conversation among group
+  - check if no one else is talking before talking
+![](./images/ch13/16.png)
+- general process
+  - station(computer) wanting to transmit senses the medium (the cable) whether there is ongoing frame transmission; if there is, wait until medium is idle and then start transmission
+    - when there is no electrical actvity, then it is idle
+  - multiple stations sense cable simultaneously for idleness
+    - if multiple units start to transmit, this is problem
+  - after starting frame transmission, listen for collision
+    - if station observes different electrical activity, then collision detected and transmission is aborted
+    - wait a random amount of time before repeating the cycle of sensing, transmitting, and looking for collision until it completes transmission successfully
+      - random time it waits before retrying increases exponentially with number of collisions experienced (**exponential backoff**)
+- protocol uses base band signaling
+  - framse digitally transmitted onto medium as binary
+- **broadband** - simultaneous analog transmission of multiple messages onto same medium
+## IEEE 802.3
+- IEEE 802.3 - special version of CSMA/CD protocol; ethernet uses this
+  - uses manchester code
+    - ensures that there is voltage transition in the middle of each bit transmission, enabling synchronization of sender and receiver
+    - if there is no voltage transition in duration of bit transmission, then assumes medium is idle
+![](./images/ch13/17.png)
+- most ethernets today are switched, meaning there is no collision
+## Wireless LAN and IEEE 802.11
+- CSMA/CA
+  - CA = collision avoidance
+  - used when stations cannot determine if ther are collisions on medium
+- detecting collisions is problematic
+  - assumes each station ca simultaneously send transmission and verify if its transmissions are being interfered with
+  - hidden terminal problem
+    - person 1 and person 3 are trying to talk to each other, but person 2 is in the middle and can hear person 1 and 3, but neither person 1 nor 3 can hear the other
+      - collision occurs without station 1 or 3 knowing
+- solution: explicitly get permission to send by sending Request to Send (RTS) control packet
+  - destination responds with Clear to Send (CTS) packet, and source then can send frame to destination
+  - RTS packets can collide, but since they are so small, damage is not very big
+## Token Ring
+- taking turns - alternative to random access
+- simple idea: polling
+  - master node polls each station in pre-determined order to see if it needs to transmit
+  - upon getting the signal from master station, slave station will transmit message
+- connect nodes in network in ring formation
+- token - special bit pattern circulates on wire
+  - node that wants to send frame waits for token, grabs it, puts frame on wire, and puts token back on wire
+  - each node looks at header of frame to see if they are destination
+    - destination or sender removes frame and regenerates token once received
+![](./images/ch13/18.png)
+- no collisions, but can have lots of latency for frame transmission
+  - if node dies, then ring is broken
+  - if token is lost, LAN cannot function
+![](./images/ch13/19.png)
+## Other Link Layer Protocols
+- ethernet is most dominant today
+- FDDI and ATM 
+  - FDDI - used for fiber optic mediums
+  - ATM - guaranteed quality of service through bandwith reservation on links and admission control to avoid congestion
+- PPP - point to point protocol
+  - used by dial up connections
+# Networking Hardware
+- repeater
+  - electrical signals decay in strength over distance, so repeater boosts energy level of bits along a connection
+- hub
+  - basically ethernet in a box/multi-port repeater
+  - relays bits received from 1 host to others
+  - computer connected to a hub have to detect collisions
+- bridges & switches
+  - bridges separates collision domains from one another
+![](./images/ch13/20.png)
+  - bridges typically connect limited number of collision domains compared to switches
+- VLAN
