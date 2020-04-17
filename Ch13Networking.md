@@ -412,14 +412,159 @@
 - PPP - point to point protocol
   - used by dial up connections
 # Networking Hardware
-- repeater
+- **repeater**
   - electrical signals decay in strength over distance, so repeater boosts energy level of bits along a connection
-- hub
+- **hub**
   - basically ethernet in a box/multi-port repeater
   - relays bits received from 1 host to others
   - computer connected to a hub have to detect collisions
-- bridges & switches
+- **bridges & switches**
   - bridges separates collision domains from one another
 ![](./images/ch13/20.png)
   - bridges typically connect limited number of collision domains compared to switches
-- VLAN
+- **VLAN**
+  - example: 
+  - if node 2 sends a broadcast packet, then nodes 6 and 7 will receive it, and no other nodes will
+![](./images/ch13/21.png)
+- **NIC**
+  - allows computer to connect to network with hub/bridge/switch
+  - either sends or receives packets at 1 time, not both
+  - every NIC has a MAC address used by bridge to route packets to destination
+  - packets have MAC address as MSB (header), and message as LSB (payload) inside LAN
+  - outside LAN, us IP (internet protocol) talked about earlier
+- **Router**
+  - another host on a LAN that understands IP addresses
+  - any node that sends message onto internet sends packet with header as MAC address of router (MSB)
+  - payload are LSB, with IP address of destination and message
+![](./images/ch13/22.png)
+# Relationship between Layer of Protocol Stack
+- TCP - most popular transport protocol
+- IP - most popular network protocol
+- TCP doesn't have to run on top of IP
+  - can use many different network protocols
+- do not have to check data integrity in packets
+# Data Structures For Packet Transmission
+- packet header
+  - metadata that is part of each packet distinct from the actual data
+    - destination address, sequence number, checksum
+- transport layer takes message from app layer and breaks up into packets
+  - puts a header in each packet
+  - sample C code for packet for transport layer:
+```c
+struct header_t {
+  int destination_address; /* destination address */
+  int source_address; /* source address */
+  int num_packets; /* total number of packets in
+  the message */
+  int sequence_number; /* sequence number of this
+  packet */
+  int packet_size; /* size of data contained in
+  the packet */
+  int checksum; /* for integrity check of this
+  packet */
+};
+struct packet_t {
+  struct header_t header; /* packet header */
+  char *data; /* pointer to the memory buffer
+  containing the data of size
+  packet_size */
+};
+```
+## TCP/IP Header
+- structure of header depends on specifics of protocol at each level
+- ex) TCP 
+  - sequence number represents position of the first byte in segment with respect to total byte stream
+  - since TCP is connection-oriented, header also contains source port and destination port
+  - ACK number = next sequence number that is expected on connection
+  - since TCP has congestion control, has window size field
+    - each endpt observes amount of congestion, and adjust window size accordingly
+  - other fields
+    - SYN - signal start of new byte-stream, so endpts synchronize sequence number
+    - FIN - end of byte stream transmission
+    - ACK - signals that header includes ACK
+    - URG - indicates if there is urgent data
+    - IP address of source and destination come from network layer - pseudo-header
+- IP packet layout: simple
+  - IP header contains length of IP packet, source/destination, length, and fragment offset (where packet is in relation to message)
+# Message Transmission Time
+- processing delay at sender (**S**)
+  - total time spent at the sender in different layer of protocol stack
+    - transport elevel functions like breaking in to packets, appending header and checksum
+    - network functions like looking up route for packet
+    - link layer functions like media access/control, framing data
+    - physical layer functions specific to medium for transmission
+- transmission delay(**Tw**)
+  - time needed to put bits on wire at sending end
+  - affected by connectivity of computer to physical medium
+  - **message size / network bandwidth**
+- Time of flight (**Tf**)
+  - delays experienced by message en route to destination
+  - propogation delay - time for bits to travel on wire from A to B
+    - factors: physical distance from a to b can be factor, but add up all link delays en route to destination instead to be precise
+  - queueing delay - caused by switched en route, as well as different network protocols
+- Processing Delay at receiver (**R**)
+  - same as sender, but for receiver
+- **Total time for msg transmission(End-to-end latency) = S + Tw + Tf + R**
+- **Throughput = msg size / end-to-end latency**
+- advanced example:
+
+![](./images/ch13/23.png)
+![](./images/ch13/24.png)
+![](./images/ch13/25.png)
+# Summary of Protocol Layer Functionalities
+- App layer
+  - HTTP, SMTP, FTP to support different types of apps like browser, mail, IM, video
+- Transport Layer
+  - delivers application messages between 2 endpts
+  - TCP/UDP
+- Network layer
+  - delivers data handed to it by transport layer
+  - fragment/reassembly for link layer, routing, forwarding
+  - routing algos
+- Data link layer
+  - interface network layer to physical medium
+  - MAC, framing packets, error detection (packet collision), error recovery
+- Physical layer
+  - mechanical/electrical details like medium data is sent on
+# Networking Software and the OS
+## Socket Library
+- Interface provided by OS to network protocol stack
+- TCP/IP are dominant protocols
+- programs live above protocol stack
+  - unix provides socket as abstraction for processes to communicate w/ one another
+  - socket should support multiple protocols
+    - different types of apps have different protocols that work best
+## Implementation of Protocol Stack in the OS
+- typically network and transport layers are implemented in software and are part of OS
+- link layer is hardware
+## Network Device Driver
+- host may have multiple network interfaces
+- NIC implements some link layer in protocol stack in hardware
+  - device driver complements this hardware functionality to enable NIC 
+- there is difference between network I/O and disk I/O
+  - OS has to be ready anytime to receive packets
+- NIC that connects to Ethernet NIC device driver
+  - alloc/dealloc network buffers in host memory for sending/receiving packets
+  - transmit network buffers, initiate DMA
+  - register network interrupt handlers with OS
+  - set up network to receive buffers, 
+  - fielding hardware interrupts and making upcalls
+# Network Programming Using Unix Sockets
+- socket creation params
+  - domain - helps pick protocol family to use for communication
+    - IP if external, Unix internal if LAN
+  - type - specifies app property (datagram or byte stream)
+  - protocol - specifies protocol that satisfies domain and type specified
+- preparation for interprocess communication
+  - create socket for comminication
+    - creates endpt of communication for server (like making telephone connection with no destination)
+    - system call (**bind**) associates name (unique identifier) to socket
+      - ex) IP has 2 ports: host adress, port #
+    - **listen** call: tells OS how many calls can be queued for the socket
+    - **accept** - need to accept connection request
+- client process to connect:
+  - create client socket
+  - make **connect** system call: connects client socket to name published by server
+![](./images/ch13/26.png)
+![](./images/ch13/27.png)
+![](./images/ch13/28.png)
