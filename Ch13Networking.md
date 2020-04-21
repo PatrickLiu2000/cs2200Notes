@@ -568,3 +568,5 @@ struct packet_t {
 ![](./images/ch13/26.png)
 ![](./images/ch13/27.png)
 ![](./images/ch13/28.png)
+- to complete connection, callee must **accept** call
+- 
