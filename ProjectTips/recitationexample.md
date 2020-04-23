@@ -5,15 +5,15 @@
 I-Mem[PC] -> FBUF
 PC + 1 -> PC
 ```
-- fetched instruction is placed into FBUF, PC incremented
+- instruction pointed to by PC is placed into FBUF, PC incremented
 # ID
 ```
 DPRF[FBUF[BR]] -> DBUF[A]
-DPRF[FBUF[Offset]] -> DBUF[B]
+FBUF[Offset] -> DBUF[B]
 FBUF[DR] -> DBUF[DR]
 FBUF[OPCODE] -> DBUF[OPCODE]
 ```
-- grab value of BR, and place into dbuf
+- grab value at BR, and place into dbuf
 - get register specifier of dr and put into dbuf
     - register number like in project
 - copy opcode to dbuf
